@@ -1,6 +1,6 @@
 <?php
 
-namespace \Async\File;
+namespace Async\File;
 use \Async\Promise;
 
 class File {
@@ -12,7 +12,7 @@ class File {
   function __construct (string $filepath) {
     if (isset(self::$instances[$filepath])) throw new Error("A File instance already exists, please load it with File::getInstance");
     else {
-      $this->$filepath = $filepath;
+      $this->filepath = $filepath;
       self::$instances[$filepath] = $this;
     }
   }
@@ -55,17 +55,17 @@ class File {
    */
 
   function readChunks (\Closure $each, int $chunksize = self::FILE_CHUNK) {
-    $handler = fopen($self->filepath, "r");
-    return new Promise(function (\Closure $resolve) use ($each, $chunksize, $handler) {
+    $handler = fopen($this->filepath, "r");
+    return new Promise(function (\Closure $resolve, \Closure $reject) use ($each, $chunksize, $handler) {
       async(function () use ($resolve, $each, $chunksize, $handler) {
-        if (\foef($handler)) {
-          return ($len = \ftell($handler) ? $len : true);
+        if (\feof($handler)) {
+          return ($len = \ftell($handler)) ? $len : true;
         }
         $chunk = fread($handler, $chunksize);
         $each($chunk);
       }, function ($err, $len) use ($handler, $resolve, $reject) {
         \fclose($handler);
-        if (\is_null($err)) $resolve(\$len);
+        if (\is_null($err)) $resolve($len);
         else $reject($err);
       });
     });
@@ -107,18 +107,18 @@ class File {
    */
 
   function append (string $text, int $chunksize = self::FILE_CHUNK) {
-    $handler = \fopen($self->filepath, "a");
-    return new Promise(function (\Closure $resolve) use (&$text, $chunksize, $handler) {
+    $handler = \fopen($this->filepath, "a");
+    return new Promise(function (\Closure $resolve, \Closure $reject) use (&$text, $chunksize, $handler) {
       async(function () use (&$text, $chunksize, $handler) {
         $chunk = \substr($text, 0, $chunksize);
         $text = \substr($text, $chunksize+1);
         if (!\strlen($chunk)) {
-          return ($len = \ftell($handler) ? $len : true);
+          return ($len = \ftell($handler)) ? $len : true;
         }
         \fwrite($handler, $chunk);
       }, function ($err, $len) use ($handler, $resolve, $reject) {
         \fclose($handler);
-        if (\is_null($err)) $resolve(\$len);
+        if (\is_null($err)) $resolve($len);
         else $reject($err);
       });
     });
