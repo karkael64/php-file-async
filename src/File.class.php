@@ -29,6 +29,23 @@ class File {
     return \file_exists($this->filepath);
   }
 
+  function getPath () {
+    return $this->filepath;
+  }
+
+  function remove () {
+    return \unlink($this->filepath);
+  }
+
+  function rename ($as) {
+    if (\rename($this->filepath, $as)) {
+      $this->filepath = $as;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 
   /**
    * @method readChunks Read a file chunk by chunks, about to manage computer resources.
