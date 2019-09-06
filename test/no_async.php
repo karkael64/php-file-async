@@ -1,12 +1,8 @@
 <?php
 
-require_once __DIR__ . "/../vendor/amonite/async/index.php";
-require_once __DIR__ . "/../index.php";
+$d = microtime(true); // echo ($d = microtime(true)) . "\n";
 
-$d = microtime(true);
-// echo ($d = microtime(true)) . "\n";
-await(function () {
-  $t = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec molestie felis. Aliquam posuere est id semper tincidunt. Etiam efficitur elit non neque dictum rutrum. Morbi et lorem at sapien sollicitudin vestibulum sit amet id leo. Quisque ornare vehicula nunc, in finibus mi gravida vitae. Integer sed metus volutpat, sodales metus id, volutpat tellus. Cras placerat lacinia ligula, ut hendrerit ante pharetra sit amet. Mauris laoreet mattis ante. Sed accumsan nisl vestibulum, porttitor nisi nec, gravida felis. Ut eu tellus eros. Phasellus tempus ante nec odio dignissim, sit amet commodo felis posuere. Proin dui ligula, mollis ut elit a, rutrum faucibus neque. In eleifend mauris at lectus varius, sed fringilla ipsum elementum. Vestibulum a mi dignissim, eleifend mauris quis, molestie ante. Quisque pharetra risus nunc, a consequat leo scelerisque imperdiet. Sed quis dapibus arcu.
+$t = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec molestie felis. Aliquam posuere est id semper tincidunt. Etiam efficitur elit non neque dictum rutrum. Morbi et lorem at sapien sollicitudin vestibulum sit amet id leo. Quisque ornare vehicula nunc, in finibus mi gravida vitae. Integer sed metus volutpat, sodales metus id, volutpat tellus. Cras placerat lacinia ligula, ut hendrerit ante pharetra sit amet. Mauris laoreet mattis ante. Sed accumsan nisl vestibulum, porttitor nisi nec, gravida felis. Ut eu tellus eros. Phasellus tempus ante nec odio dignissim, sit amet commodo felis posuere. Proin dui ligula, mollis ut elit a, rutrum faucibus neque. In eleifend mauris at lectus varius, sed fringilla ipsum elementum. Vestibulum a mi dignissim, eleifend mauris quis, molestie ante. Quisque pharetra risus nunc, a consequat leo scelerisque imperdiet. Sed quis dapibus arcu.
 
 Praesent semper justo non dui dignissim vulputate. Sed tortor eros, elementum eu congue ut, pharetra quis leo. Praesent massa neque, bibendum ac gravida eget, condimentum et orci. Quisque quis tincidunt massa. Quisque sit amet ex est. Proin a dui auctor, congue justo consequat, lacinia urna. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
 
@@ -17,23 +13,24 @@ Suspendisse mattis eget tellus a euismod. Donec imperdiet mi eu nisl maximus mol
 Aenean fringilla, neque ut congue maximus, arcu nisl viverra orci, in vehicula libero ante ornare nulla. Integer nisi leo, consequat vel metus vestibulum, pharetra pharetra neque. Pellentesque aliquet vestibulum tortor sit amet pulvinar. Nunc vulputate tellus felis. Nullam varius felis ex, sed vulputate massa tristique nec. In vitae neque quis neque egestas dictum ultricies et sem. Ut id mattis elit, et convallis turpis. Etiam sit amet tellus ut libero facilisis facilisis eget congue quam. Suspendisse a sodales erat, non lacinia ligula. Nulla non neque at purus malesuada eleifend nec a diam.
 ";
 
-  $f = Async\File\File::getInstance(__DIR__ . "/test.any");
-  // $f->exists()->then(function ($bo) { echo "file exists: " . json_encode($bo) . "\n"; });
-  $p1 = $f->append("Hello, World!\n");
-  $p2 = $f->append($t);
-  $p3 = $f->append("Welcome home!\n");
-  // $f->exists()->then(function ($bo) { echo "file exists: " . json_encode($bo) . "\n"; });
-  $l = 0;
-  $f->readLines(function ($line) use (&$l) {
-    $l++;
-    // echo "#$l:\t$line\n";
-  });
-  $f->unlock()->then(function () use ($f) {
-    $f->remove();
-    // $f->exists()->then(function ($bo) { echo "file exists: " . json_encode($bo) . "\n"; });
-  });
-});
+$f = __DIR__ . "/tmp.any";
+// echo "file exists: " . json_encode(file_exists($f)) . "\n";
+$h = fopen($f, 'a');
+fwrite($h, "Hello, World!\n");
+fwrite($h, $t);
+fwrite($h, "Welcome home!\n");
+fclose($h);
 
-$diff = ((microtime(true)-$d)*1000);
-// echo ($diff = ((microtime(true)-$d)*1000)) . "\n";
+$h = fopen($f, 'r');
+// echo "file exists: " . json_encode(file_exists($f)) . " (" . json_encode($f) . ")\n";
+$l = 0;
+while (($line = fgets($h)) !== false) {
+  // echo "#$l:\t$line";
+  $l++;
+}
+fclose($h);
+unlink($f);
+// echo "file exists: " . json_encode(file_exists($f)) . "\n";
+
+$diff = ((microtime(true)-$d)*1000); // echo ($diff = ((microtime(true)-$d)*1000)) . "\n";
 return $diff;
